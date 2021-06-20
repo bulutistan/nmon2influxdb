@@ -5,9 +5,9 @@ package nmon
 
 import (
 	"fmt"
+	influxdbclient2 "github.com/adejoux/nmon2influxdb/influxdbv2/influxdbclient"
 	"os"
 
-	"github.com/adejoux/influxdbclient"
 	"github.com/adejoux/nmon2influxdb/nmon2influxdblib"
 	"github.com/urfave/cli/v2"
 )
@@ -25,10 +25,10 @@ func Stat(c *cli.Context) error {
 		os.Exit(1)
 	}
 
-	influxdb := config.ConnectDB(config.InfluxdbDatabase)
+	influxdb := config.ConnectDB(config.InfluxdbDatabase, config.InfluxdbOrganization)
 	metric := config.Metric
 
-	filters := new(influxdbclient.Filters)
+	filters := new(influxdbclient2.Filters)
 
 	filters.Add("host", config.StatsHost, "text")
 
@@ -45,14 +45,14 @@ func Stat(c *cli.Context) error {
 	}
 
 	//generate stats
-	stats := influxdbclient.BuildStats(result)
+	stats := influxdbclient2.BuildStats(result)
 
 	DisplayStats(&stats, config.StatsSort, config.StatsLimit)
 	return nil
 }
 
 // DisplayStats displays metrics statistics in text mode.
-func DisplayStats(stats *influxdbclient.DataStats, sort string, limit int) {
+func DisplayStats(stats *influxdbclient2.DataStats, sort string, limit int) {
 	fmt.Printf("%20s|%10s|%10s|%10s|%10s|%10s\n", "field", "Min", "Mean", "Median", "Max", "Points #")
 	stats.FieldSort(sort)
 	for i, stat := range *stats {

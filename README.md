@@ -5,6 +5,20 @@ This application take a nmon file and upload it in a [InfluxDB](influxdb.com) da
 It generates also a dashboard to allow data visualization in [Grafana](http://grafana.org/).
 It's working on linux only for now.
 
+## Added Influx v2.0 without Grafana!
+
+### Can't execute query and auto create database on this release.
+### Only work with credential that username and password.
+### We have don't try with grafana, maybe you will tried.
+### Change database property with bucket on configuration.
+### Added organization property on configuration.
+
+* influxdb_database="<YOUR_BUCKET_HERE>"
+* influxdb_organization="<YOUR_ORGANIZATION_HERE>"
+
+## Great thanks for this project of Adejoux!
+
+
 # Demo
 
 A live demo is available at : [demo.nmon2influxdb.org](http://demo.nmon2influxdb.org)

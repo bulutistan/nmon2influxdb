@@ -5,9 +5,9 @@ package nmon
 
 import (
 	"fmt"
+	influxdbclient2 "github.com/adejoux/nmon2influxdb/influxdbv2/influxdbclient"
 	"regexp"
 
-	"github.com/adejoux/influxdbclient"
 	"github.com/adejoux/nmon2influxdb/nmon2influxdblib"
 	"github.com/urfave/cli/v2"
 	//	"os"
@@ -18,8 +18,8 @@ func ListMeasurement(c *cli.Context) error {
 	// parsing parameters
 	config := nmon2influxdblib.ParseParameters(c)
 
-	influxdb := config.ConnectDB(config.InfluxdbDatabase)
-	filters := new(influxdbclient.Filters)
+	influxdb := config.ConnectDB(config.InfluxdbDatabase, config.InfluxdbOrganization)
+	filters := new(influxdbclient2.Filters)
 
 	if len(config.ListHost) > 0 {
 		filters.Add("host", config.ListHost, "text")

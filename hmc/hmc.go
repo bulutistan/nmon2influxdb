@@ -11,6 +11,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	influxdbclient2 "github.com/adejoux/nmon2influxdb/influxdbv2/influxdbclient"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,7 +20,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/adejoux/influxdbclient"
 	"github.com/adejoux/nmon2influxdb/nmon2influxdblib"
 	"github.com/urfave/cli/v2"
 )
@@ -27,7 +27,7 @@ import (
 // HMC contains the base struct used by all the hmc sub command
 type HMC struct {
 	Session             *Session
-	InfluxDB            *influxdbclient.InfluxDB
+	InfluxDB            *influxdbclient2.InfluxDB
 	GlobalPoint         Point
 	FilterManagedSystem string
 	Debug               bool

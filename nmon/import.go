@@ -6,6 +6,7 @@ package nmon
 
 import (
 	"fmt"
+	influxdbclient2 "github.com/adejoux/nmon2influxdb/influxdbv2/influxdbclient"
 	"log"
 	"math"
 	"os"
@@ -15,7 +16,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/adejoux/influxdbclient"
 	"github.com/adejoux/nmon2influxdb/nmon2influxdblib"
 	"github.com/urfave/cli/v2"
 )
@@ -81,7 +81,7 @@ func Import(c *cli.Context) error {
 		lines := nmonFile.Content()
 		log.Printf("NMON file separator: %s\n", nmonFile.Delimiter)
 		var last string
-		filters := new(influxdbclient.Filters)
+		filters := new(influxdbclient2.Filters)
 		filters.Add("file", path.Base(nmonFile.Name), "text")
 
 		timeStamp, err := influxdbLog.ReadLastPoint("value", filters, "timestamp")

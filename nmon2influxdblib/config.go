@@ -6,13 +6,14 @@ package nmon2influxdblib
 import (
 	"bufio"
 	"bytes"
+	"fmt"
+	influxdbclient2 "github.com/adejoux/nmon2influxdb/influxdbv2/influxdbclient"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
 	"path/filepath"
 
-	"github.com/adejoux/influxdbclient"
 	"github.com/naoina/toml"
 	"github.com/urfave/cli/v2"
 )
@@ -33,6 +34,7 @@ type Config struct {
 	InfluxdbSecure        bool
 	InfluxdbSkipCertCheck bool
 	InfluxdbDatabase      string
+	InfluxdbOrganization  string
 	GrafanaUser           string
 	GrafanaPassword       string
 	GrafanaURL            string `toml:"grafana_URL"`
@@ -132,10 +134,16 @@ func GetCfgFile() string {
 		return "/etc/nmon2influxdb/nmon2influxdb.cfg"
 	}
 
+	if OnCurrentPath, err := os.Getwd(); err == nil {
+		currentCFGFile := fmt.Sprintf("%s/%s", OnCurrentPath, ".nmon2influxdb.cfg")
+		if IsFile(currentCFGFile) {
+			return currentCFGFile
+		}
+	}
+
 	currUser, _ := user.Current()
 	home := currUser.HomeDir
-	homeCFGfile := filepath.Join(home, ".nmon2influxdb.cfg")
-	return homeCFGfile
+	return filepath.Join(home, ".nmon2influxdb.cfg")
 }
 
 //IsFile returns true if the file doesn't exist
@@ -279,27 +287,29 @@ func ParseParameters(c *cli.Context) (config *Config) {
 }
 
 // ConnectDB connect to the specified influxdb database
-func (config *Config) ConnectDB(db string) *influxdbclient.InfluxDB {
-	influxdbConfig := influxdbclient.InfluxDBConfig{
+func (config *Config) ConnectDB(db, org string) *influxdbclient2.InfluxDB {
+	influxdbConfig := influxdbclient2.InfluxDBConfig{
 		Host:          config.InfluxdbServer,
 		Port:          config.InfluxdbPort,
 		Database:      db,
+		Organization:  org,
 		User:          config.InfluxdbUser,
 		Pass:          config.InfluxdbPassword,
 		Debug:         config.Debug,
 		Secure:        config.InfluxdbSecure,
 		SkipCertCheck: config.InfluxdbSkipCertCheck,
 	}
-	influxdb, err := influxdbclient.NewInfluxDB(influxdbConfig)
+	influxdb, err := influxdbclient2.NewInfluxDB(influxdbConfig)
 	CheckError(err)
 
 	return &influxdb
 }
 
 // GetDB create or get the influxdb database used for nmon data
-func (config *Config) GetDB(dbType string) *influxdbclient.InfluxDB {
+func (config *Config) GetDB(dbType string) *influxdbclient2.InfluxDB {
 
 	db := config.InfluxdbDatabase
+	org := config.InfluxdbOrganization
 	retention := config.ImportDataRetention
 
 	if dbType == "hmc" {
@@ -307,7 +317,7 @@ func (config *Config) GetDB(dbType string) *influxdbclient.InfluxDB {
 		retention = config.HMCDataRetention
 	}
 
-	influxdb := config.ConnectDB(db)
+	influxdb := config.ConnectDB(db, org)
 
 	if exist, _ := influxdb.ExistDB(db); exist != true {
 		log.Printf("Creating InfluxDB database %s\n", db)
@@ -328,9 +338,9 @@ func (config *Config) GetDB(dbType string) *influxdbclient.InfluxDB {
 }
 
 // GetLogDB create or get the influxdb database like defined in config
-func (config *Config) GetLogDB() *influxdbclient.InfluxDB {
+func (config *Config) GetLogDB() *influxdbclient2.InfluxDB {
 
-	influxdb := config.ConnectDB(config.ImportLogDatabase)
+	influxdb := config.ConnectDB(config.ImportLogDatabase, config.InfluxdbOrganization)
 
 	if exist, _ := influxdb.ExistDB(config.ImportLogDatabase); exist != true {
 		_, err := influxdb.CreateDB(config.ImportLogDatabase)
