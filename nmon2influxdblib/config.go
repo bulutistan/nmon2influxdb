@@ -70,6 +70,7 @@ type Config struct {
 	ListFilter            string `toml:",omitempty"`
 	ListHost              string `toml:",omitempty"`
 	Inputs                Inputs `toml:"input"`
+	ConfFile              string
 }
 
 // Inputs allows to put multiple input in the configuration file
@@ -128,8 +129,16 @@ func InitConfig() Config {
 }
 
 //GetCfgFile returns the current configuration file path
-func GetCfgFile() string {
+func GetCfgFile(c *cli.Context) string {
 	// if configuration file exist in /etc/nmon2influxdb. Stop here.
+
+	if c != nil {
+		paramFile := c.String("config_path")
+		if IsFile(paramFile) {
+			return paramFile
+		}
+	}
+
 	if IsFile("/etc/nmon2influxdb/nmon2influxdb.cfg") {
 		return "/etc/nmon2influxdb/nmon2influxdb.cfg"
 	}
@@ -174,13 +183,15 @@ func (config *Config) BuildCfgFile(cfgfile string) {
 }
 
 // LoadCfgFile loads current configuration file settings
-func (config *Config) LoadCfgFile() (cfgfile string) {
+func (config *Config) LoadCfgFile(c *cli.Context) (cfgfile string) {
 
-	cfgfile = GetCfgFile()
+	cfgfile = GetCfgFile(c)
 
 	//it would be only if no conf file exists. And it will build a configuration file in the home directory
 	if !IsFile(cfgfile) {
 		config.BuildCfgFile(cfgfile)
+	} else {
+		log.Printf("Using configuration file %s\n", cfgfile)
 	}
 
 	file, err := os.Open(cfgfile)
@@ -205,7 +216,7 @@ func (config *Config) LoadCfgFile() (cfgfile string) {
 // AddDashboardParams initialize default parameters for dashboard
 func (config *Config) AddDashboardParams() {
 	dfltConfig := InitConfig()
-	dfltConfig.LoadCfgFile()
+	dfltConfig.LoadCfgFile(nil)
 
 	config.GrafanaAccess = dfltConfig.GrafanaAccess
 	config.GrafanaURL = dfltConfig.GrafanaURL
@@ -219,7 +230,7 @@ func (config *Config) AddDashboardParams() {
 func ParseParameters(c *cli.Context) (config *Config) {
 	config = new(Config)
 	*config = InitConfig()
-	config.LoadCfgFile()
+	config.LoadCfgFile(c)
 
 	config.Metric = c.String("metric")
 	config.StatsHost = c.String("statshost")
@@ -261,6 +272,7 @@ func ParseParameters(c *cli.Context) (config *Config) {
 	config.InfluxdbSkipCertCheck = c.Bool("skip_cert_check")
 	config.InfluxdbPassword = c.String("pass")
 	config.Timezone = c.String("tz")
+	config.ConfFile = c.String("config_path")
 
 	if len(config.DebugFile) > 0 {
 		//if a debug file is set. Debug is true
@@ -282,8 +294,7 @@ func ParseParameters(c *cli.Context) (config *Config) {
 		config.AddDashboardParams()
 	}
 
-	return
-
+	return config
 }
 
 // ConnectDB connect to the specified influxdb database

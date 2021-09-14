@@ -14,10 +14,7 @@ import (
 func main() {
 	config := new(application.AppConfig).Init()
 
-	app := new(application.AppCli).Init(config).MakeCommands().MakeFlags().Ready()
-
-	err := app.Run(os.Args)
-	if err != nil {
+	if err := new(application.AppCli).Init(config).Ready(os.Args); err != nil {
 		log.Fatalln(err)
 	}
 

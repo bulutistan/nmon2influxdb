@@ -12,8 +12,11 @@ type AppCli struct {
 	Config nmon2influxdblib.Config
 }
 
-func (c AppCli) Init(config nmon2influxdblib.Config) AppCli {
-	c.App = cli.NewApp()
+func (c AppCli) Init(config nmon2influxdblib.Config) *AppCli {
+	c.App = &cli.App{
+		Commands: c.MakeCommands(),
+		Flags:    c.MakeFlags(),
+	}
 	c.Config = config
 
 	c.App.Name = "nmon2influxdb"
@@ -21,12 +24,11 @@ func (c AppCli) Init(config nmon2influxdblib.Config) AppCli {
 	c.App.Version = "2.1.7"
 	c.App.Authors = []*cli.Author{{Name: "Alain Dejoux", Email: "adejoux@djouxtech.net"}}
 
-	return c
+	return &c
 }
 
-func (c AppCli) MakeCommands() AppCli {
-
-	c.App.Commands = []*cli.Command{
+func (c AppCli) MakeCommands() []*cli.Command {
+	commands := []*cli.Command{
 		{
 			Name:  "import",
 			Usage: "import nmon files",
@@ -222,18 +224,21 @@ func (c AppCli) MakeCommands() AppCli {
 							Usage: "HMC connection timeout",
 							Value: c.Config.HMCTimeout,
 						},
+						&cli.StringFlag{
+							Name:  "config_path",
+							Usage: "HMC configuration file",
+							Value: c.Config.ConfFile,
+						},
 					},
 				},
 			},
 		},
 	}
-
-	return c
+	return commands
 }
 
-func (c AppCli) MakeFlags() AppCli {
-
-	c.App.Flags = []cli.Flag{
+func (c AppCli) MakeFlags() []cli.Flag {
+	flags := []cli.Flag{
 		&cli.StringFlag{
 			Name:  "server,s",
 			Usage: "InfluxDB server and port",
@@ -285,10 +290,9 @@ func (c AppCli) MakeFlags() AppCli {
 			Value: c.Config.Timezone,
 		},
 	}
-
-	return c
+	return flags
 }
 
-func (c AppCli) Ready() *cli.App {
-	return c.App
+func (c AppCli) Ready(arguments []string) error {
+	return c.App.Run(arguments)
 }

@@ -16,6 +16,9 @@ It's working on linux only for now.
 * influxdb_database="<YOUR_BUCKET_HERE>"
 * influxdb_organization="<YOUR_ORGANIZATION_HERE>"
 
+### Added argument for configuration file as relative path.
+hmc import --samples SAMPLE_VAL --config_path CUSTOM_PATH_HERE
+
 ## Great thanks for this project of Adejoux!
 
 
