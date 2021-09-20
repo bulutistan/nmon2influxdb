@@ -221,6 +221,10 @@ type Session struct {
 
 // NewSession initialize a Session struct
 func NewSession(user string, password string, url string, timeout int) *Session {
+	if timeout < 90 {
+		timeout = 90
+	}
+
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}

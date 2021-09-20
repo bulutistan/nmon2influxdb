@@ -103,7 +103,7 @@ func InitConfig() Config {
 		HMCPassword:           "abc123",
 		HMCDatabase:           "nmon2influxdbHMC",
 		HMCSamples:            10,
-		HMCTimeout:            30,
+		HMCTimeout:            120,
 		GrafanaUser:           "admin",
 		GrafanaPassword:       "admin",
 		GrafanaURL:            "http://localhost:3000",
