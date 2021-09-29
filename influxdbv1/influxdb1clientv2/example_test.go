@@ -15,7 +15,7 @@ import (
 func ExampleNewClient() {
 	host, err := url.Parse(fmt.Sprintf("http://%s:%d", "localhost", 8086))
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	// NOTE: this assumes you've setup a user and have setup shell env variables,
@@ -27,7 +27,7 @@ func ExampleNewClient() {
 	}
 	con, err := client.NewClient(conf)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	log.Println("Connection", con)
 }
@@ -35,16 +35,16 @@ func ExampleNewClient() {
 func ExampleClient_Ping() {
 	host, err := url.Parse(fmt.Sprintf("http://%s:%d", "localhost", 8086))
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	con, err := client.NewClient(client.Config{URL: *host})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	dur, ver, err := con.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	log.Printf("Happy as a hippo! %v, %s", dur, ver)
 }
@@ -52,11 +52,11 @@ func ExampleClient_Ping() {
 func ExampleClient_Query() {
 	host, err := url.Parse(fmt.Sprintf("http://%s:%d", "localhost", 8086))
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	con, err := client.NewClient(client.Config{URL: *host})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	q := client.Query{
@@ -71,11 +71,11 @@ func ExampleClient_Query() {
 func ExampleClient_Write() {
 	host, err := url.Parse(fmt.Sprintf("http://%s:%d", "localhost", 8086))
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	con, err := client.NewClient(client.Config{URL: *host})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	var (
@@ -108,6 +108,6 @@ func ExampleClient_Write() {
 	}
 	_, err = con.Write(bps)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 }

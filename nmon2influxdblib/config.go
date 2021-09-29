@@ -129,13 +129,13 @@ func InitConfig() Config {
 }
 
 //GetCfgFile returns the current configuration file path
-func GetCfgFile(c *cli.Context) string {
+func GetCfgFile() string {
 	// if configuration file exist in /etc/nmon2influxdb. Stop here.
 
-	if c != nil {
-		paramFile := c.String("config_path")
-		if IsFile(paramFile) {
-			return paramFile
+	cfgFileArg := GetOsArgs("--config_path")
+	if cfgFileArg != nil {
+		if IsFile(*cfgFileArg) {
+			return *cfgFileArg
 		}
 	}
 
@@ -183,9 +183,9 @@ func (config *Config) BuildCfgFile(cfgfile string) {
 }
 
 // LoadCfgFile loads current configuration file settings
-func (config *Config) LoadCfgFile(c *cli.Context) (cfgfile string) {
+func (config *Config) LoadCfgFile() (cfgfile string) {
 
-	cfgfile = GetCfgFile(c)
+	cfgfile = GetCfgFile()
 
 	//it would be only if no conf file exists. And it will build a configuration file in the home directory
 	if !IsFile(cfgfile) {
@@ -216,7 +216,7 @@ func (config *Config) LoadCfgFile(c *cli.Context) (cfgfile string) {
 // AddDashboardParams initialize default parameters for dashboard
 func (config *Config) AddDashboardParams() {
 	dfltConfig := InitConfig()
-	dfltConfig.LoadCfgFile(nil)
+	dfltConfig.LoadCfgFile()
 
 	config.GrafanaAccess = dfltConfig.GrafanaAccess
 	config.GrafanaURL = dfltConfig.GrafanaURL
@@ -230,52 +230,50 @@ func (config *Config) AddDashboardParams() {
 func ParseParameters(c *cli.Context) (config *Config) {
 	config = new(Config)
 	*config = InitConfig()
-	config.LoadCfgFile(c)
+	config.LoadCfgFile()
 
 	config.ConfFile = c.String("config_path")
 	config.HMCSamples = c.Int("samples")
 
-	if config.ConfFile == "" {
-		config.Metric = c.String("metric")
-		config.StatsHost = c.String("statshost")
-		config.StatsFrom = c.String("from")
-		config.StatsTo = c.String("to")
-		config.StatsLimit = c.Int("limit")
-		config.StatsFilter = c.String("filter")
-		config.ImportSkipDisks = c.Bool("nodisks")
-		if c.IsSet("cpus") {
-			config.ImportAllCpus = c.Bool("cpus")
-		}
-		config.ImportBuildDashboard = c.Bool("build")
-		config.ImportSkipMetrics = c.String("skip_metrics")
-		config.ImportLogDatabase = c.String("log_database")
-		config.ImportLogRetention = c.String("log_retention")
-		config.DashboardWriteFile = c.Bool("file")
-		config.ListFilter = c.String("filter")
-		config.ImportForce = c.Bool("force")
-		config.ListHost = c.String("host")
-		config.GrafanaUser = c.String("guser")
-		config.GrafanaPassword = c.String("gpassword")
-		config.GrafanaAccess = c.String("gaccess")
-		config.GrafanaURL = c.String("gurl")
-		config.GrafanaDatasource = c.String("datasource")
-		config.Debug = c.Bool("debug")
-		config.DebugFile = c.String("debug-file")
-		config.HMCServer = c.String("hmc")
-		config.HMCUser = c.String("hmcuser")
-		config.HMCPassword = c.String("hmcpass")
-		config.HMCManagedSystem = c.String("managed_system")
-		config.HMCManagedSystemOnly = c.Bool("managed_system-only")
-		config.HMCTimeout = c.Int("timeout")
-		config.InfluxdbServer = c.String("server")
-		config.InfluxdbUser = c.String("user")
-		config.InfluxdbPort = c.String("port")
-		config.InfluxdbDatabase = c.String("db")
-		config.InfluxdbSecure = c.Bool("secure")
-		config.InfluxdbSkipCertCheck = c.Bool("skip_cert_check")
-		config.InfluxdbPassword = c.String("pass")
-		config.Timezone = c.String("tz")
+	config.Metric = c.String("metric")
+	config.StatsHost = c.String("statshost")
+	config.StatsFrom = c.String("from")
+	config.StatsTo = c.String("to")
+	config.StatsLimit = c.Int("limit")
+	config.StatsFilter = c.String("filter")
+	config.ImportSkipDisks = c.Bool("nodisks")
+	if c.IsSet("cpus") {
+		config.ImportAllCpus = c.Bool("cpus")
 	}
+	config.ImportBuildDashboard = c.Bool("build")
+	config.ImportSkipMetrics = c.String("skip_metrics")
+	config.ImportLogDatabase = c.String("log_database")
+	config.ImportLogRetention = c.String("log_retention")
+	config.DashboardWriteFile = c.Bool("file")
+	config.ListFilter = c.String("filter")
+	config.ImportForce = c.Bool("force")
+	config.ListHost = c.String("host")
+	config.GrafanaUser = c.String("guser")
+	config.GrafanaPassword = c.String("gpassword")
+	config.GrafanaAccess = c.String("gaccess")
+	config.GrafanaURL = c.String("gurl")
+	config.GrafanaDatasource = c.String("datasource")
+	config.Debug = c.Bool("debug")
+	config.DebugFile = c.String("debug-file")
+	config.HMCServer = c.String("hmc")
+	config.HMCUser = c.String("hmcuser")
+	config.HMCPassword = c.String("hmcpass")
+	config.HMCManagedSystem = c.String("managed_system")
+	config.HMCManagedSystemOnly = c.Bool("managed_system-only")
+	config.HMCTimeout = c.Int("timeout")
+	config.InfluxdbServer = c.String("server")
+	config.InfluxdbUser = c.String("user")
+	config.InfluxdbPort = c.String("port")
+	config.InfluxdbDatabase = c.String("db")
+	config.InfluxdbSecure = c.Bool("secure")
+	config.InfluxdbSkipCertCheck = c.Bool("skip_cert_check")
+	config.InfluxdbPassword = c.String("pass")
+	config.Timezone = c.String("tz")
 
 	if len(config.DebugFile) > 0 {
 		//if a debug file is set. Debug is true
@@ -283,7 +281,7 @@ func ParseParameters(c *cli.Context) (config *Config) {
 
 		debugFile, err := os.OpenFile(config.DebugFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
-			log.Fatalf("error opening file: %v", err)
+			log.Printf("error opening file: %v", err)
 		}
 		// never closing the file here to be able to change the log output in all packages
 		// No better solution for now.
@@ -380,4 +378,13 @@ func (config *Config) Sanitized() (debugConfig Config) {
 	debugConfig.InfluxdbUser = secretUser
 	debugConfig.InfluxdbPassword = secretPassword
 	return
+}
+
+func GetOsArgs(key string) *string {
+	for i, arg := range os.Args {
+		if arg == key {
+			return &os.Args[i+1]
+		}
+	}
+	return nil
 }

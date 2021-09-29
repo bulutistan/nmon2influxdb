@@ -87,7 +87,7 @@ func (db *InfluxDB) queryDB(cmd string, dbname string) (res []client.Result, err
 		}
 		res = response.Results
 	} else {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	return
 }
@@ -226,7 +226,7 @@ func (db *InfluxDB) AddPoint(measurement string, timestamp time.Time, fields map
 func (db *InfluxDB) WritePoints() (err error) {
 	err = db.client.Write(db.points)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	return
 }

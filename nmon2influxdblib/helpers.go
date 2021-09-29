@@ -20,7 +20,7 @@ import (
 //CheckError check error message and display it
 func CheckError(e error) {
 	if e != nil {
-		log.Fatal(e)
+		log.Print(e)
 	}
 }
 

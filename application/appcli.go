@@ -13,11 +13,12 @@ type AppCli struct {
 }
 
 func (c AppCli) Init(config nmon2influxdblib.Config) *AppCli {
-	c.App = &cli.App{
-		Commands: c.MakeCommands(),
-		Flags:    c.MakeFlags(),
-	}
+	c.App = cli.NewApp()
+
 	c.Config = config
+
+	c.App.Commands = c.MakeCommands()
+	c.App.Flags = c.MakeFlags()
 
 	c.App.Name = "nmon2influxdb"
 	c.App.Usage = "upload NMON stats to InfluxDB database"

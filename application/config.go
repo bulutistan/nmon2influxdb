@@ -12,15 +12,19 @@ type AppConfig struct {
 func (c AppConfig) Init() nmon2influxdblib.Config {
 	config := nmon2influxdblib.InitConfig()
 
+	configFile := config.LoadCfgFile()
+
 	if len(config.DebugFile) > 0 {
 		debugFile, err := os.OpenFile("config.DebugFile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
-			log.Fatalf("error opening file: %v", err)
+			log.Printf("error opening file: %v", err)
 		}
 		defer debugFile.Close()
 		log.SetOutput(debugFile)
 
 	}
+
+	log.Printf("Using configuration file %s\n", configFile)
 
 	// cannot set values directly for boolean flags
 	if config.DashboardWriteFile {

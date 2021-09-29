@@ -228,7 +228,7 @@ func InitSFTP(sshUser string, host string, key string) *sftp.Client {
 	if IsFile(key) {
 		pemBytes, err := ioutil.ReadFile(key)
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 		}
 		signer, err := ssh.ParsePrivateKey(pemBytes)
 
@@ -252,12 +252,12 @@ func InitSFTP(sshUser string, host string, key string) *sftp.Client {
 	sshhost := fmt.Sprintf("%s:22", host)
 	conn, err := ssh.Dial("tcp", sshhost, config)
 	if err != nil {
-		log.Fatalf("dial failed:%v", err)
+		log.Printf("dial failed:%v", err)
 	}
 
 	c, err := sftp.NewClient(conn)
 	if err != nil {
-		log.Fatalf("unable to start sftp subsytem: %v", err)
+		log.Printf("unable to start sftp subsytem: %v", err)
 	}
 	return c
 }

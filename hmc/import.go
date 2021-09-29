@@ -23,7 +23,7 @@ func Import(c *cli.Context) error {
 	hmc := NewHMC(c)
 
 	if hmc.Samples > 0 {
-		log.Printf("Fetching %d latest samples. 30 seconds interval.\n", hmc.Samples)
+		log.Printf("Fetching %d latest samples. %d seconds interval.\n", hmc.Samples, hmc.Timeout)
 	} else {
 		log.Printf("Fetching latest 2 hours performance metrics. See hmc_samples parameter.\n")
 	}

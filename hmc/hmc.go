@@ -35,6 +35,7 @@ type HMC struct {
 	Samples             int
 	TagParsers          nmon2influxdblib.TagParsers
 	Token               string
+	Timeout             int
 }
 
 // Point is a struct to simplify InfluxDB point creation
@@ -77,6 +78,7 @@ func NewHMC(c *cli.Context) *HMC {
 	hmc.Samples = config.HMCSamples
 	hmc.Debug = config.Debug
 	hmc.FilterManagedSystem = config.HMCManagedSystem
+	hmc.Timeout = config.HMCTimeout
 
 	if len(config.Inputs) > 0 {
 		//Build tag parsing
@@ -221,8 +223,8 @@ type Session struct {
 
 // NewSession initialize a Session struct
 func NewSession(user string, password string, url string, timeout int) *Session {
-	if timeout < 90 {
-		timeout = 90
+	if timeout < 30 {
+		timeout = 30
 	}
 
 	tr := &http.Transport{
@@ -231,7 +233,7 @@ func NewSession(user string, password string, url string, timeout int) *Session 
 
 	jar, err := cookiejar.New(nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	log.Printf("Session Timeout %d\n", timeout)
@@ -263,7 +265,7 @@ func (s *Session) doLogon() string {
 	authrequest := new(bytes.Buffer)
 	err := tmpl.Execute(authrequest, s)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	request, err := http.NewRequest("PUT", authurl, authrequest)
@@ -275,11 +277,11 @@ func (s *Session) doLogon() string {
 
 	response, err := s.client.Do(request)
 	if err != nil {
-		log.Fatalf("HMC error sending auth request: %v\n", err)
+		log.Printf("HMC error sending auth request: %v\n", err)
 	} else {
 		defer response.Body.Close()
 		if response.StatusCode != 200 {
-			log.Fatalf("HMC authentication error: %s\n", response.Status)
+			log.Printf("HMC authentication error: %s\n", response.Status)
 		}
 	}
 
@@ -301,11 +303,11 @@ func (s *Session) DoLogoff(token string) {
 	response, err := s.client.Do(request)
 
 	if err != nil {
-		log.Fatalf("HMC error sending auth request: %v\n", err)
+		log.Printf("HMC error sending auth request: %v\n", err)
 	} else {
 		defer response.Body.Close()
 		if response.StatusCode != 204 {
-			log.Fatalf("HMC logoff error: %s\n", response.Status)
+			log.Printf("HMC logoff error: %s\n", response.Status)
 		} else {
 			log.Printf("Succesfully logged off")
 		}
@@ -431,7 +433,7 @@ func (s *Session) getPCMData(rawurl string, debug bool) (PCMData, error) {
 	}
 
 	if response.StatusCode != 200 {
-		log.Fatalf("Error getting PCM Data informations. status code: %d", response.StatusCode)
+		log.Printf("Error getting PCM Data informations. status code: %d", response.StatusCode)
 	}
 
 	jsonErr := json.Unmarshal(contents, &data)
@@ -467,7 +469,7 @@ func (s *Session) getManagedSystems() (systems []System, err error) {
 	}
 
 	if response.StatusCode != 200 {
-		log.Fatalf("Error getting LPAR informations. status code: %d", response.StatusCode)
+		log.Printf("Error getting LPAR informations. status code: %d", response.StatusCode)
 	}
 
 	var feed Feed
